@@ -1,0 +1,8 @@
+This is version 2.00 of the Ucam::Term distribution:
+
+  Ucam::Term - return information about the start and end dates of
+  terms (and a few related events) at the University of Cambridge, UK.
+
+This software is Copyright (c) University of Cambridge Computing
+Service. This program is free software; you can distribute it and/or
+modify it under the same terms as Perl itself.

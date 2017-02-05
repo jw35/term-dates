@@ -1,0 +1,9 @@
+Changes
+INSTALL
+LICENSE
+Makefile.PL
+MANIFEST
+README
+lib/Ucam/Term.pm
+t/basic.t
+
