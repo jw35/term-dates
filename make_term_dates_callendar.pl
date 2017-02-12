@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# Prints to STDOUT an ICAL calendar for University of Cambridge Term Dates
+
 use strict;
 use warnings;
 
@@ -43,18 +45,8 @@ foreach my $year (Ucam::Term->available_years) {
 
         # For easter, add general Admission and the Long Vac
         if ($term->name eq 'Easter') {
-
-            # The 2012 edition of S&O contains a discrepency between
-            # the General Admission dates in the table and the rules
-            # for deriving the dates for 2014-15. Omit GA and Long Vac 
-            # 2015 until this is resolved.
-            if ($year != 2025) {
-
-                add_span($calendar, $term->general_admission, "General Admission");
-                add_span($calendar, $term->long_vac, "Long Vacation courses");
- 
-           }
-
+	    add_span($calendar, $term->general_admission, "General Admission");
+	    add_span($calendar, $term->long_vac, "Long Vacation courses");
         }
 
     }

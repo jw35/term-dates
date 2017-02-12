@@ -8,7 +8,7 @@ use DateTime;
 use DateTime::Span;
 use DateTime::Duration;
 
-our $VERSION = 2.00;
+our $VERSION = "3.00";
 
 =head1 NAME
 
@@ -58,45 +58,48 @@ day of the period.
 
 =cut
 
-# See Ordinances, Chapter II, 'Terms and Long Vacation' and
-# Ordinances, Chapter II, 'Admission to Degrees'
-# http://www.admin.cam.ac.uk/univ/so/
-# as ammended in respect of General Admission by grace 1 of 13 February 2013
+# See Ordinances, Chapter II, Section 10 'Dates of Term and Full Term'
+# and Ordinances, Chapter II, Section 12 'Admission to Degrees'
+# http://www.admin.cam.ac.uk/univ/so/ as ammended in respect of
+# General Admission by grace 1 of 13 February 2013
 # (http://www.admin.cam.ac.uk/reporter/2012-13/weekly/6297/section6.shtml)
+# and by grace 2 of 5 February 2014
+# (http://www.admin.cam.ac.uk/reporter/2013-14/weekly/6336/section8.shtml)
 
 # "The dates on which Full Terms begin and end shall be as shown in
 # the table appended to these regulations"
 
-# This data represents the first day of full term, extracted from the
-# table in S&O (2009 edition for 2007 to 2020, 2012 edition for 2011 
-# cd to 2030)
+# This data represents the first day of full term and of General
+# Admission (Thursdays before 2014, Wednesdays from 2014 onwards),
+# extracted from the table in S&O Chapter II, Section 10 (2009 edition
+# for 2007 to 2020, 2012 edition for 2011 to 2030)
 
 use constant FULL_TERM_START =>
-#                   Jan      Apr      Oct
-    { 2007 => {                   m =>  2 },
-      2008 => { l => 15, e => 22, m =>  7 },
-      2009 => { l => 13, e => 21, m =>  6 },
-      2010 => { l => 12, e => 20, m =>  5 },
-      2011 => { l => 18, e => 26, m =>  4 },
-      2012 => { l => 17, e => 24, m =>  2 },
-      2013 => { l => 15, e => 23, m =>  8 },
-      2014 => { l => 14, e => 22, m =>  7 },
-      2015 => { l => 13, e => 21, m =>  6 },
-      2016 => { l => 12, e => 19, m =>  4 },
-      2017 => { l => 17, e => 25, m =>  3 },
-      2018 => { l => 16, e => 24, m =>  2 },
-      2019 => { l => 15, e => 23, m =>  8 },
-      2020 => { l => 14, e => 21, m =>  6 },
-      2021 => { l => 19, e => 27, m =>  5 },
-      2022 => { l => 18, e => 26, m =>  4 },
-      2023 => { l => 17, e => 25, m =>  3 },
-      2024 => { l => 16, e => 23, m =>  8 },
-      2025 => { l => 21, e => 29, m =>  7 },
-      2026 => { l => 20, e => 28, m =>  6 },
-      2027 => { l => 19, e => 27, m =>  5 },
-      2028 => { l => 18, e => 25, m =>  3 },
-      2029 => { l => 16, e => 24, m =>  2 },
-      2030 => { l => 15, e => 23,         },
+#                   Jan      Apr  Jun/Jul      Oct
+    { 2007 => {                            m =>  2 },
+      2008 => { l => 15, e => 22, g => 26, m =>  7 },
+      2009 => { l => 13, e => 21, g => 25, m =>  6 },
+      2010 => { l => 12, e => 20, g => 24, m =>  5 },
+      2011 => { l => 18, e => 26, g => 30, m =>  4 },
+      2012 => { l => 17, e => 24, g => 28, m =>  2 },
+      2013 => { l => 15, e => 23, g => 27, m =>  8 },
+      2014 => { l => 14, e => 22, g => 25, m =>  7 },
+      2015 => { l => 13, e => 21, g => 24, m =>  6 },
+      2016 => { l => 12, e => 19, g => 22, m =>  4 },
+      2017 => { l => 17, e => 25, g => 28, m =>  3 },
+      2018 => { l => 16, e => 24, g => 27, m =>  2 },
+      2019 => { l => 15, e => 23, g => 26, m =>  8 },
+      2020 => { l => 14, e => 21, g => 24, m =>  6 },
+      2021 => { l => 19, e => 27, g => 30, m =>  5 },
+      2022 => { l => 18, e => 26, g => 29, m =>  4 },
+      2023 => { l => 17, e => 25, g => 28, m =>  3 },
+      2024 => { l => 16, e => 23, g => 26, m =>  8 },
+      2025 => { l => 21, e => 29, g => 2,  m =>  7 },
+      2026 => { l => 20, e => 28, g => 1,  m =>  6 },
+      2027 => { l => 19, e => 27, g => 30, m =>  5 },
+      2028 => { l => 18, e => 25, g => 28, m =>  3 },
+      2029 => { l => 16, e => 24, g => 27, m =>  2 },
+      2030 => { l => 15, e => 23, g => 26,         },
   };
 
 use constant TERM_NAME => { m => 'Michaelmas', l => 'Lent', e => 'Easter' };
@@ -425,7 +428,11 @@ sub division {
 
 =item * $term->general_admission()
 
-Return the start/end dates for General Admission
+Return the start/end dates for General Admission based on the table
+that appears in Ordinances, Chapter II, Section 10 'Dates of Term and
+Full Term' (see general_admission_alg() for what should be the same
+data derived from the algorythm in Ordinances, Chapter II, Section 12
+'Admission to Degrees')
 
    my $span = $term->general_admission
 
@@ -450,7 +457,58 @@ sub general_admission {
     # Extract from cache if available
     return $self->{cache}->{ga} if $self->{cache}->{ga};
 
-# UPTO AND INCLUDING 2013
+    # General admission can fall in June or July
+    my $dayone = FULL_TERM_START->{$self->{year}}->{'g'};
+    my $month = $dayone > 15 ? JUN : JUL;
+    my $start = DateTime->new(year=>$self->{year}, 
+                              month=>$month, 
+                              day=>$dayone);
+
+    # Upto 2013, GA was three day, from 2014 it's 4 dayss
+    my $duration = $self->{year} <= 2013 ? THREE_DAYS : FOUR_DAYS;
+
+    my $ga = DateTime::Span->
+        from_datetime_and_duration(start => $start,
+                                   duration => $duration);
+    # Cache the result and return it
+    $self->{cache}->{ga} = $ga;
+    return $ga;
+
+}
+
+=item * $term->general_admission_alg()
+
+Return the start/end dates for General Admission based on the
+algorythm that appears in Ordinances, Chapter II, Section 12
+'Admission to Degrees' (see general_admission() for what should be the
+same data derived from the algorythm in Ordinances, Chapter II,
+Section 10 'Dates of Trem and Full Term' )
+
+   my $span = $term->general_admission_alg
+
+Return a DateTime::Span representing the period of General Admission
+following an Easter term. The span runs from 00:00 on the first day of
+General Admission (inclusive) to 00:00 on the day after the final day
+(exclusive). Returns undef unless the module has data for this
+term. Croaks if called on an object that doesn't represent an Easter
+term.
+
+=cut
+
+sub general_admission_alg {
+    my $self = shift;
+
+    croak "Can only call general_admission() on an Easter term object"
+        unless $self->{term} eq 'e';
+
+    my $term_start = FULL_TERM_START->{$self->{year}}->{$self->{term}};
+    return undef unless defined($term_start);
+
+    # Extract from cache if available
+    return $self->{cache}->{ga_alg} if $self->{cache}->{ga_alg};
+    
+# In Ordnances upto the set published in 2013 the rule was:   
+#
 # "In every year the Thursday, Friday, and Saturday after the third
 # Sunday in June shall be days of General Admission to Degrees, save
 # that, in accordance with Regulation 3 for Terms and Long Vacation,
@@ -458,45 +516,41 @@ sub general_admission {
 # the days of General Admission shall be the Thursday, Friday, and
 # Saturday after the fourth Sunday in June"
 #
-# WITH EFFECT FROM 2014
-# "Every year the Wednesday, Thursday, Friday, and Saturday after the
-# third Sunday in June shall be days of General Admission to Degrees,
-# save that, in accordance to Regulation 3 for Terms and Long
-# Vacation, in any year in which Full Easter Term begins on or after
-# 22 April the days of General Admission shall be the Wednesday,
-# Thursday, Friday, and Saturday after the fourth Sunday in June."
+# adding "Wednesday" in 2013 itself. However this didn't actually
+# produce the dates published (since 2010) elsewhere in Ordnances.
+# To fix this the rule was changed from the 2014 edition onnward by
+# Grace 2 of 5 February 2014 to be:  
+#
+# "Every year the Wednesday, Thursday, Friday, and Saturday in the
+# week next but one following the last week of Full Easter Term shall
+# be days of General Admission to Degrees."
+#
+# Conviniently this produces the same dates as the old algorythm
+# (when adjusted for the inclusion of Wednesday only from 2013) for
+# all years supported by this module.
 
-    # Find first day in June
-    my $start =  DateTime->new(year=>$self->{year}, month=>JUN, day=>1);
-    #print STDERR "1st June: ", $start, "\n";
-    # Move to 1st Sunday
-    my $dow = $start->day_of_week();
-    $start->add ( days => (7-$dow+7)%7);
-    #print STDERR "1st sunday in June: ", $start, "\n";
-    # Move to the third or fourth Sunday
-    if ($term_start >= 22) {
-        $start->add (weeks => 3);
-    }
-    else {
-        $start->add (weeks => 2);
-    }
+    # Saturday after the last day of Full Easter Term
+    my $start = $self->fullterm_dates->end;
 
-    # Move to Wednesday or Thursday, select duration
+    # Move to the week next but one
+    $start->add (weeks => 2);
+    
+    # Thursday or Wednesday and three or four days 
     my $duration;
-    if ($self->{year} <= 2013) {
-        $start->add (days => 4);
-        $duration = THREE_DAYS;
+    if ($self->year <= 2013) {
+	$start->subtract (days => 2);
+	$duration = THREE_DAYS;
     }
     else {
-        $start->add (days => 3);
-        $duration = FOUR_DAYS;
+	$start->subtract (days => 3);
+	$duration = FOUR_DAYS;
     }
 
     my $ga = DateTime::Span->
         from_datetime_and_duration(start => $start,
                                    duration => $duration);
     # Cache the result and return it
-    $self->{cache}->{ga} = $ga;
+    $self->{cache}->{ga_alg} = $ga;
     return $ga;
 
 }
@@ -567,7 +621,7 @@ implemented by this module:
 
 =over 4
 
-"TERMS AND LONG VACATION"
+"Section 10: DATES OF TERM AND FULL TERM"
 
 "1. The Michaelmas Term shall begin on 1 October and shall consist of
 eighty days, ending on 19 December. The Lent Term shall begin on 5
@@ -592,7 +646,7 @@ within the Precincts of the University shall begin earlier than the
 second Monday after General Admission or end later than the sixth
 Saturday after the Saturday of General Admission."
 
-"ADMISSION TO DEGREES"
+"Section 12: ADMISSION TO DEGREES"
 
 [Prior to 2013]:
 
@@ -609,7 +663,7 @@ Degrees at such hours as the Vice-Chancellor shall appoint."
 (http://www.admin.cam.ac.uk/reporter/2012-13/weekly/6297/section6.shtml)
 with effect from 1 October 2013]:
 
-"3. Every year the Wednesday, Thursday, Friday, and Saturday after the
+"13. Every year the Wednesday, Thursday, Friday, and Saturday after the
 third Sunday in June shall be days of General Admission to Degrees,
 save that, in accordance to Regulation 3 for Terms and Long Vacation,
 in any year in which Full Easter Term begins on or after 22 April the
@@ -618,6 +672,18 @@ and Saturday after the fourth Sunday in June. On each day of General
 Admission there shall be one or more Congregations for General
 Admission to Degrees at such hours as the Vice-Chancellor shall
 appoint."
+
+[As ammended by Grace 2 of 5 February 2014
+(http://www.admin.cam.ac.uk/reporter/2013-14/weekly/6336/section8.shtml)]
+
+"14. Every year the Wednesday, Thursday, Friday, and Saturday in the
+week next but one following the last week of Full Easter Term shall be
+days of General Admission to Degrees."
+
+[In practice, the dates of General Admission as given in the table in
+Section 10: 'Dates of Term and Full Term' appear to be cannonical -
+between 2010 and 2014 the dates in the table and the ordnance diagreed
+and it was the ordanance that was updated]
 
 =back
 
@@ -637,9 +703,9 @@ See also L<DateTime>, L<DateTime::Span>
 
 =head1 COPYRIGHT and LICENSE
 
-Copyright (c) University of Cambridge Computing Service. This program
-is free software; you can distribute it and/or modify it under the
-same terms as Perl itself.
+Copyright (c) 2010, 2013, 2017 University of Cambridge Information
+Services. This program is free software; you can distribute it and/or
+modify it under the same terms as Perl itself.
 
 The full text of the license can be found in the LICENSE file included
 with this module.

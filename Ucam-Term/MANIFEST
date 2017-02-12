@@ -4,6 +4,7 @@ LICENSE
 Makefile.PL
 MANIFEST
 README
+README.pod
 lib/Ucam/Term.pm
 t/basic.t
-
+t/ga.t

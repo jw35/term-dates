@@ -11,3 +11,8 @@ Revision history for Perl extension Ucam::Terms.
           13 February 2013
           http://www.admin.cam.ac.uk/reporter/2012-13/weekly/6297/section6.shtml)
 
+3.00  Sun Jan 12 2017
+        - Adapt for revised definition of the dates of Full Term (Grace 2
+	  of 5 February 2014 - in practice this only affects General
+	  Admission in 2025.
+	  
